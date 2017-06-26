@@ -3,17 +3,28 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Events!</title>
-   
+    <title>HANGMAN</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" />
+    <!--     <style>
+      #noose{
+        float:left;
+      }
+     h1{
+      clear: both;
+     }
+    </style> -->
 </head>
 
 <body>
     <div class="container">
-        <div class="row">
-            <div class="col-md-offset-2 col-md-8">
-                <div class="jumbotron">
-                    <h2>You just typed <span id="user-text"><strong>...Nothing.</strong></span></h2>
+        <div class="jumbotron">
+            <div class="row">
+                <div class="col-md-4">
+                    <img id="noose" src="./assets/images/hangman.jpg" alt="hangman" />
+                </div>
+                <div class="col-md-8">
+                    <h1><strong><center>HANGMAN</center></strong></h1>
+                    <h2>You picked: <span id="user-text"><strong>...New Game...</strong></span></h2>
                 </div>
             </div>
         </div>
@@ -22,13 +33,188 @@
                 <img src="./assets/images/Hangman-0.png" id="hanging-tree" alt="hanging-tree" />
             </div>
             <div class="col-md-8">
-            <p id="word-display">-</p>
-            <p id="picked">-<p>
-
+                <p id="word-display"></p>
+                <p id="picked"></p>
+            </div>
         </div>
-
     </div>
-     <script src="./assets/script/hangman.js"></script>
+    <!-- ***************************************************** -->
+    <script>
+    var wins = 0;
+    var losses = 0;
+
+    var gameover = true;
+    var play = false
+    var wordIndex = 0;
+    var word = "";
+    var wordMaster = "";
+    var display = document.getElementById("word-display");
+    var pickedDisp = document.getElementById("picked");
+    var tree = document.getElementById("hanging-tree");
+    var picked = [];
+    var playerPick = "";
+    var userText = "";
+    var badpick = 0;
+    var found = 0;
+    var displayArray = [];
+    var validPick = false;
+
+    var wordList = ['beekeeping', 'fluffiness', 'sleeveless', 'babies', 'puzzling', 'foxes', 'joker', 'jars', 'jazz', 'buzz', 'jinx', 'puff', 'quiz', 'voodoo', 'faking'];
+
+    var alphabet = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z']
+
+    newGame();
+
+    userText = document.getElementById("user-text");
+    userText.textContent = "";
+
+    document.onkeyup = function(event) {
+        playerPick = event.key.toUpperCase();
+        userText.textContent = event.key;
+        console.log("player pick " + playerPick);
+        updatePicked();
+
+    };
+
+    function newGame() {
+        // reinitialize variables for new game except wins/losses
+        gameover = true;
+        play = false
+        wordIndex = 0;
+        word = "";
+        wordMaster = "";
+        picked = [];
+        playerPick = "";
+        userText = "";
+        badpick = 0;
+        found = 0;
+        displayArray = [];
+        validPick = false;
+        // new game?
+        if (gameover === true) {
+            if (wins === 0 && losses === 0) {
+                play = confirm("Would you like to play a game?");
+            } else {
+                play = confirm("Wins: " + wins + "\nLosses: " + losses + "\n\nWould you like to play again?");
+            }
+            console.log("New game: " + play);
+            if (play === false) {
+                location.replace("goodbye.html");
+            } else {
+                gameover = false;
+                letsPlay();
+            }
+        }
+    }
+
+
+    function letsPlay() {;
+        userText = document.getElementById("user-text");
+        userText.textContent = "";
+        display = document.getElementById("word-display"); // reset word display
+        display.textContent = "";
+        pickedDisp = document.getElementById("picked"); // reset picked display
+        pickedDisp.innerHTML = "";
+        tree = document.getElementById("hanging-tree"); // reset tree
+        tree.src = "./assets/images/Hangman-0.png";
+        //initilize word
+        wordIndex = Math.round(Math.random() * (wordList.length - 1));
+        word = wordList[wordIndex].toUpperCase();
+        wordMaster = word;
+        console.log("the word is " + word)
+        for (i = 0; i < word.length; i++) {
+            displayArray[i] = "_";
+            display.textContent = display.textContent + displayArray[i] + " ";
+        }
+    }
+
+
+    function updatePicked() {
+        pickedDisp = document.getElementById("picked");
+        if (alphabet.indexOf(playerPick) === -1) { //is this a letter
+            pickedDisp.innerHTML = playerPick + " is not a Letter. <br>Pick a letter.<br>"; // not a letter message
+            validPick = false;
+        } else if (picked.indexOf(playerPick) === -1) { //has this been picked already?
+            picked.push(playerPick);
+            console.log(playerPick);
+            pickedDisp.innerHTML = "";
+            validPick = true;
+        } else {
+            pickedDisp.innerHTML = "You already picked " + playerPick + ". <br>Pick another letter.<br>"; // already picked message
+            validPick = false;
+        }
+        for (i = 0; i < picked.length; i++) {
+            pickedDisp.innerHTML = pickedDisp.innerHTML + picked[i].toUpperCase() + " "; //report of picked letters
+        }
+        if (validPick === true) {
+            isLetterFound();
+        }
+    }
+
+
+    function isLetterFound() {
+        found = word.indexOf(playerPick);
+        if (found === -1) {
+            //Letter does not appear in the word.
+            alert(playerPick + " is not part of this word");
+            badpick++;
+            updateHangingTree();
+        } else {
+            console.log(" letter is in word")
+            updateWordDisplay();
+        }
+    }
+
+
+    function updateWordDisplay() {
+        display = document.getElementById("word-display");
+        for (i = 0; i < word.length; i++) {
+            if (playerPick === word.charAt(i)) {
+                word = word.slice(0, i) + "_" + word.slice(i + 1, word.length);
+                displayArray[i] = playerPick;
+                display.textContent = "";
+                for (j = 0; j < word.length; j++) {
+                    display.textContent = display.textContent + displayArray[j] + " ";
+                }
+            }
+        }
+        if (displayArray.indexOf("_") === -1) {
+            youWin();
+        }
+    }
+
+
+    function updateHangingTree() {
+        console.log(badpick);
+        if (badpick % 2 === 0) {
+            tree = document.getElementById("hanging-tree");
+            tree.src = "./assets/images/Hangman-" + badpick / 2 + ".png";
+        }
+        if (badpick === 12) {
+            youLoose();
+        }
+    }
+
+
+    function youWin() {
+        console.log('you win');
+        gameover = true;
+        wins++;
+        alert("The word was " + wordMaster);
+        newGame();
+
+    }
+
+
+    function youLoose() {
+        console.log('you loose');
+        gameover = true;
+        losses++;
+        alert("The word was " + wordMaster);
+        newGame();
+    }
+    </script>
 </body>
+<!-- <script src="./assets/script/hangman.js"></script> -->
 
 </html>

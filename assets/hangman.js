@@ -1,5 +1,5 @@
  // Let's start by grabbing a reference to the <span> below.
- console.log("This ran");
+ console.log('This ran');
  var userText = document.getElementById("user-text");
 
 
@@ -17,6 +17,7 @@ console.log("This ran");
  function updateWordDisplay() {
      var word = document.getElementById("word-display");
      word.textContent = "PLACEHOLDER";
+      console.log('This ran');
  }
 
 
@@ -27,6 +28,6 @@ console.log("This ran");
 
  function updateHangingTree(){
  	var tree=document.getElementById("hanging-tree");
- 	tree.src="../images/Hangman-1.png";
+ 	tree.src="./assets/images/Hangman-1.png";
  	console.log(tree.src);
  }
